@@ -554,11 +554,8 @@ function Drill(props: {
         <PosterButton tone="pink" disabled={!props.canSubmit} onClick={props.onSubmit}>
           Submit answer
         </PosterButton>
-        <button
-          onClick={props.onWithdraw}
-          className="bb-sticker bg-paper text-[11px] text-ink"
-        >
-          Withdraw consent &amp; exit
+        <button onClick={props.onWithdraw} className="bb-sticker bg-paper text-[11px] text-ink">
+          {props.voiceMode ? <>Withdraw consent &amp; exit</> : "Exit drill"}
         </button>
       </div>
     </section>
