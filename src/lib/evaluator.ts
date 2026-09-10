@@ -238,6 +238,16 @@ export function evaluateBehavioralResponse(
     clarification_asked: options.clarificationAsked,
     most_important_gap: gapBehavior ? gapBehavior.gapMessage : null,
     reinforcement_message: reinforcement,
+    proof_of_impact: {
+      banger_id: DEMO_BANGER_ID,
+      drill_id: DRILL_ID,
+      assessment_completed: true,
+      behaviors_demonstrated_count: demonstrated.length,
+      total_behaviors: BEHAVIORS.length,
+      result,
+      clarification_asked: options.clarificationAsked,
+      completed_at: new Date().toISOString(),
+    },
   };
 }
 

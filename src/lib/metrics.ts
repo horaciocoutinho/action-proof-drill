@@ -1,11 +1,13 @@
 /**
  * OR-11: lightweight measurement instrumentation.
- * Session-scoped only — nothing leaves the browser.
+ * Session-scoped only: these events are held in memory for this page session
+ * and are not sent anywhere.
  */
 
 export type MetricEventName =
   | "session_started"
   | "consent_granted"
+  | "consent_withdrawn"
   | "response_captured"
   | "clarification_asked"
   | "result_generated"
