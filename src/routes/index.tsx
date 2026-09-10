@@ -632,9 +632,8 @@ function ResultScreen({
       <Panel tone="deep" className="mt-7 p-5">
         <Sticker tone="cyan">Business impact</Sticker>
         <p className="mt-3 text-base font-medium">
-          Banger Drill gives Business Bangerz something new to sell after delivery: scenario-based evidence that
-          employees can apply the message. That creates a premium “verified” tier and a path to recurring
-          reinforcement work.
+          Banger Drill creates a sellable post-delivery proof layer: scenario-based evidence that employees can apply
+          the message. That can support a premium “verified” tier and recurring reinforcement work.
         </p>
       </Panel>
 
