@@ -57,7 +57,8 @@ Fallback / stubbed / honest limitations (MR-6):
 - Measurement events and the proof-of-impact payload are in-memory for the session only. There is no analytics
   backend and nothing is persisted.
 - Consent can be withdrawn mid-drill ("Withdraw consent & exit"): audio stops, session drill state is cleared, a
-  `consent_withdrawn` event is logged, and the app returns to the landing screen.
+  `consent_withdrawn` event is logged, and the app returns to the landing screen. In typed-only sessions no microphone
+  consent was granted, so the same control is labeled "Exit drill" and no `consent_withdrawn` event is logged.
 - No revenue, attach-rate, or dollar figures are shown anywhere. We do not have that data.
 - There is exactly one drill, hard-coded. There is no authoring UI.
 
