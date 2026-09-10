@@ -22,8 +22,8 @@ chose for F5: **scenario-based evidence that an employee can apply the message t
 claims about what any existing Business Bangerz product does or does not measure, and we do not assert that this idea
 is new to the team — this is simply the slice we built.
 
-Commercially, evidence of application is what makes a premium "verified" tier and recurring reinforcement work
-sellable after delivery.
+Commercially, this is a potential mechanism rather than a claim of novelty: evidence of application is the kind of
+post-delivery proof layer that can support a premium "verified" tier and recurring reinforcement work.
 
 ## 3. What actually works
 
