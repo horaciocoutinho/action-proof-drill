@@ -393,11 +393,13 @@ function Consent({
   checked,
   onChange,
   onGrant,
+  onTypedOnly,
   onDecline,
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
   onGrant: () => void;
+  onTypedOnly: () => void;
   onDecline: () => void;
 }) {
   return (
