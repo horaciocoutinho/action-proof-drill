@@ -3,8 +3,8 @@
 @import "tw-animate-css";
 
 @theme {
-  --font-display: "Archivo", "Helvetica Neue", sans-serif;
-  --font-sans: "Archivo", "Helvetica Neue", sans-serif;
+  --font-display: "Anton", "Haettenschweiler", Impact, sans-serif;
+  --font-sans: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
@@ -74,47 +74,103 @@
 }
 
 :root {
-  --radius: 0.75rem;
-  /* Banger Drill: near-black stage, cream type, one vivid accent (electric lime). */
-  --background: oklch(0.16 0.008 260);
-  --foreground: oklch(0.96 0.015 90);
-  --card: oklch(0.21 0.009 260);
-  --card-foreground: oklch(0.96 0.015 90);
-  --popover: oklch(0.21 0.009 260);
-  --popover-foreground: oklch(0.96 0.015 90);
-  --primary: oklch(0.87 0.22 128);
-  --primary-foreground: oklch(0.17 0.02 130);
-  --secondary: oklch(0.27 0.01 260);
-  --secondary-foreground: oklch(0.96 0.015 90);
-  --muted: oklch(0.25 0.009 260);
-  --muted-foreground: oklch(0.72 0.012 260);
-  --accent: oklch(0.87 0.22 128);
-  --accent-foreground: oklch(0.17 0.02 130);
-  --destructive: oklch(0.63 0.23 25);
-  --destructive-foreground: oklch(0.98 0.01 90);
-  --border: oklch(0.32 0.01 260);
-  --input: oklch(0.32 0.01 260);
-  --ring: oklch(0.87 0.22 128);
-  --success: oklch(0.82 0.2 145);
-  --success-foreground: oklch(0.17 0.02 130);
-  --warning: oklch(0.83 0.17 82);
-  --warning-foreground: oklch(0.19 0.02 80);
-  --chart-1: oklch(0.87 0.22 128);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.21 0.009 260);
-  --sidebar-foreground: oklch(0.96 0.015 90);
-  --sidebar-primary: oklch(0.87 0.22 128);
-  --sidebar-primary-foreground: oklch(0.17 0.02 130);
-  --sidebar-accent: oklch(0.27 0.01 260);
-  --sidebar-accent-foreground: oklch(0.96 0.015 90);
-  --sidebar-border: oklch(0.32 0.01 260);
-  --sidebar-ring: oklch(0.87 0.22 128);
+  --radius: 0.9rem;
+  /* Business Bangerz: teal stage, cream type, hot-pink + acid-lime accents, ink outlines. */
+  --background: oklch(0.48 0.09 182);
+  --foreground: oklch(0.96 0.02 88);
+  --ink: oklch(0.15 0.012 265);
+  --paper: oklch(0.96 0.02 88);
+  --teal-deep: oklch(0.4 0.085 183);
+  --teal-bright: oklch(0.8 0.14 180);
+  --card: oklch(0.42 0.085 183);
+  --card-foreground: oklch(0.96 0.02 88);
+  --popover: oklch(0.42 0.085 183);
+  --popover-foreground: oklch(0.96 0.02 88);
+  --primary: oklch(0.7 0.22 2);
+  --primary-foreground: oklch(0.15 0.012 265);
+  --secondary: oklch(0.9 0.19 116);
+  --secondary-foreground: oklch(0.15 0.012 265);
+  --muted: oklch(0.44 0.08 183);
+  --muted-foreground: oklch(0.9 0.03 90);
+  --accent: oklch(0.9 0.19 116);
+  --accent-foreground: oklch(0.15 0.012 265);
+  --destructive: oklch(0.66 0.24 6);
+  --destructive-foreground: oklch(0.96 0.02 88);
+  --border: oklch(0.15 0.012 265);
+  --input: oklch(0.15 0.012 265);
+  --ring: oklch(0.9 0.19 116);
+  --success: oklch(0.9 0.19 116);
+  --success-foreground: oklch(0.15 0.012 265);
+  --warning: oklch(0.87 0.17 88);
+  --warning-foreground: oklch(0.15 0.012 265);
+  --chart-1: oklch(0.7 0.22 2);
+  --chart-2: oklch(0.8 0.14 180);
+  --chart-3: oklch(0.9 0.19 116);
+  --chart-4: oklch(0.87 0.17 88);
+  --chart-5: oklch(0.96 0.02 88);
+  --sidebar: oklch(0.42 0.085 183);
+  --sidebar-foreground: oklch(0.96 0.02 88);
+  --sidebar-primary: oklch(0.7 0.22 2);
+  --sidebar-primary-foreground: oklch(0.15 0.012 265);
+  --sidebar-accent: oklch(0.9 0.19 116);
+  --sidebar-accent-foreground: oklch(0.15 0.012 265);
+  --sidebar-border: oklch(0.15 0.012 265);
+  --sidebar-ring: oklch(0.9 0.19 116);
 }
 
+@theme inline {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-teal-deep: var(--teal-deep);
+  --color-teal-bright: var(--teal-bright);
+}
 
+/* Poster-print panel: thick ink outline + hard offset shadow. */
+@utility bb-panel {
+  border: 3px solid var(--ink);
+  border-radius: var(--radius);
+  box-shadow: 6px 6px 0 0 var(--ink);
+}
+
+@utility bb-panel-sm {
+  border: 3px solid var(--ink);
+  border-radius: 0.7rem;
+  box-shadow: 4px 4px 0 0 var(--ink);
+}
+
+/* Screen-printed sticker label. */
+@utility bb-sticker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  padding: 0.3rem 1rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0 0 var(--ink);
+}
+
+/* Halftone dot + grain texture for large background areas. */
+@utility bb-halftone {
+  background-image:
+    radial-gradient(color-mix(in oklab, var(--ink) 16%, transparent) 1.4px, transparent 1.5px),
+    radial-gradient(color-mix(in oklab, var(--paper) 10%, transparent) 1.2px, transparent 1.3px);
+  background-size: 18px 18px, 26px 26px;
+  background-position: 0 0, 9px 13px;
+}
+
+@utility bb-headline {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.88;
+}
+
+@utility bb-ink-shadow {
+  text-shadow: 4px 4px 0 var(--ink);
+}
 
 @layer base {
   * {

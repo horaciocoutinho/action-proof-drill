@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Mic, Square, ChevronDown, Check, X, Volume2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -42,6 +41,97 @@ export const Route = createFileRoute("/")({
 });
 
 type Step = "landing" | "consent" | "drill" | "result";
+
+/* ---------- brand primitives ---------- */
+
+function Sticker({
+  children,
+  tone = "lime",
+  className = "",
+}: {
+  children: React.ReactNode;
+  tone?: "lime" | "pink" | "yellow" | "cream" | "cyan";
+  className?: string;
+}) {
+  const tones: Record<string, string> = {
+    lime: "bg-accent text-accent-foreground",
+    pink: "bg-primary text-primary-foreground",
+    yellow: "bg-warning text-warning-foreground",
+    cream: "bg-paper text-ink",
+    cyan: "bg-teal-bright text-ink",
+  };
+  return <span className={`bb-sticker text-[11px] sm:text-xs ${tones[tone]} ${className}`}>{children}</span>;
+}
+
+function Panel({
+  children,
+  tone = "deep",
+  className = "",
+}: {
+  children: React.ReactNode;
+  tone?: "deep" | "paper" | "pink" | "lime" | "yellow";
+  className?: string;
+}) {
+  const tones: Record<string, string> = {
+    deep: "bg-teal-deep text-foreground",
+    paper: "bg-paper text-ink",
+    pink: "bg-primary text-primary-foreground",
+    lime: "bg-accent text-accent-foreground",
+    yellow: "bg-warning text-warning-foreground",
+  };
+  return <div className={`bb-panel ${tones[tone]} ${className}`}>{children}</div>;
+}
+
+function PosterButton({
+  children,
+  onClick,
+  tone = "pink",
+  disabled,
+  className = "",
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  tone?: "pink" | "lime" | "cream" | "yellow";
+  disabled?: boolean;
+  className?: string;
+}) {
+  const tones: Record<string, string> = {
+    pink: "bg-primary text-primary-foreground",
+    lime: "bg-accent text-accent-foreground",
+    cream: "bg-paper text-ink",
+    yellow: "bg-warning text-warning-foreground",
+  };
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`bb-panel-sm font-display uppercase tracking-wide transition-transform ${tones[tone]} px-8 py-4 text-xl active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-45 ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Equalizer({ active, big = false }: { active: boolean; big?: boolean }) {
+  const bars = big ? [26, 52, 38, 64, 30, 46, 22] : [10, 22, 34, 22, 14];
+  return (
+    <div className={`flex items-end gap-[4px] ${big ? "h-16" : "h-9"}`}>
+      {bars.map((h, i) => (
+        <span
+          key={i}
+          className="w-[6px] rounded-sm border-2 border-ink bg-accent"
+          style={{
+            height: h,
+            animation: active ? `bb-bounce 0.6s ease-in-out ${i * 0.08}s infinite alternate` : undefined,
+          }}
+        />
+      ))}
+      <style>{`@keyframes bb-bounce { from { transform: scaleY(0.45); } to { transform: scaleY(1.25); } }`}</style>
+    </div>
+  );
+}
+
+/* ---------- main flow (logic unchanged) ---------- */
 
 function BangerDrill() {
   const metrics = useMemo(() => createMetrics(), []);
@@ -164,21 +254,19 @@ function BangerDrill() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 py-10">
-        <header className="mb-10 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <WaveMark active={speaking || listening} />
+    <main className="bb-halftone min-h-screen bg-background text-foreground">
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-8">
+        <header className="mb-8 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Equalizer active={speaking || listening} />
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-                Business Bangerz
-              </p>
-              <p className="text-lg font-bold tracking-tight">Banger Drill</p>
+              <Sticker tone="pink">Business Bangerz</Sticker>
+              <p className="mt-1 font-display text-2xl uppercase tracking-wide">Banger Drill</p>
             </div>
           </div>
           <button
             onClick={() => setDemoMode((v) => !v)}
-            className="rounded-full border border-border px-3 py-1 text-[11px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+            className={`bb-sticker text-[11px] ${demoMode ? "bg-warning text-warning-foreground" : "bg-teal-deep text-foreground"}`}
           >
             {demoMode ? "Demo tools on" : "Demo"}
           </button>
@@ -214,7 +302,7 @@ function BangerDrill() {
 
         {step === "result" && result && <ResultScreen result={result} events={events} onRestart={restart} />}
 
-        <footer className="mt-auto pt-12 text-xs text-muted-foreground">
+        <footer className="mt-auto pt-10 text-sm font-medium text-foreground/80">
           Offline demo mode · Browser speech only · Session external API cost: $0.00
         </footer>
       </div>
@@ -222,51 +310,49 @@ function BangerDrill() {
   );
 }
 
-function WaveMark({ active }: { active: boolean }) {
-  return (
-    <div className="flex h-9 items-end gap-[3px]">
-      {[10, 22, 34, 22, 14].map((h, i) => (
-        <span
-          key={i}
-          className={`w-[3px] rounded-full bg-primary transition-all duration-300 ${active ? "animate-pulse" : ""}`}
-          style={{ height: active ? h + 4 : h }}
-        />
-      ))}
-    </div>
-  );
-}
+/* ---------- screens ---------- */
 
 function Landing({ onStart }: { onStart: () => void }) {
   return (
     <section className="flex flex-1 flex-col justify-center">
-      <h1 className="text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl">
-        Proof that the message
-        <br />
-        turned into <span className="text-primary">action.</span>
-      </h1>
-      <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-        Banger Drill checks whether people know what to do — not just what the song said.
+      <Sticker tone="cream" className="self-start">
+        Business Bangerz
+      </Sticker>
+      <h1 className="bb-headline bb-ink-shadow mt-4 text-[19vw] leading-[0.82] sm:text-[9.5rem]">Banger Drill</h1>
+      <p className="mt-5 max-w-3xl font-display text-2xl uppercase tracking-wide text-paper sm:text-4xl">
+        Proof that the message turned into action.
       </p>
 
-      <div className="mt-10 rounded-2xl border border-border bg-card p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">Fictional drill</p>
-        <h2 className="mt-2 text-2xl font-bold">{DRILL_NAME}</h2>
-        <p className="mt-3 text-sm text-muted-foreground">
-          One spoken scenario. One spoken answer. Up to one clarification question. Then a structured behavioral
-          result checked against three expected behaviors.
-        </p>
-        <ul className="mt-4 space-y-1 text-sm text-muted-foreground">
-          {BEHAVIORS.map((b) => (
-            <li key={b.id}>
-              <span className="font-mono text-primary">{b.letter}.</span> {b.label}
-            </li>
-          ))}
-        </ul>
+      <div className="mt-9 grid gap-5 md:grid-cols-[1.35fr_1fr]">
+        <Panel tone="paper" className="p-6">
+          <Sticker tone="pink">Fictional drill</Sticker>
+          <h2 className="bb-headline mt-3 text-3xl sm:text-4xl">{DRILL_NAME}</h2>
+          <p className="mt-3 text-base font-medium">
+            One spoken scenario. One spoken answer. Up to one clarification question. Then a structured behavioral
+            result checked against three expected behaviors.
+          </p>
+          <ul className="mt-4 space-y-2">
+            {BEHAVIORS.map((b) => (
+              <li key={b.id} className="bb-panel-sm flex items-start gap-3 bg-teal-bright px-4 py-3 text-base font-bold">
+                <span className="font-display text-xl leading-none">{b.letter}.</span>
+                <span>{b.label}</span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+
+        <Panel tone="pink" className="flex flex-col items-center justify-center gap-6 p-6">
+          <Equalizer active big />
+          <p className="text-center font-display text-2xl uppercase leading-tight">
+            Prove they know what to do — not just what the song said.
+          </p>
+          <Mic className="h-14 w-14" strokeWidth={2.5} />
+        </Panel>
       </div>
 
-      <Button size="lg" onClick={onStart} className="mt-8 h-14 self-start px-10 text-base font-bold">
+      <PosterButton tone="lime" onClick={onStart} className="mt-9 self-start text-3xl">
         Start Drill
-      </Button>
+      </PosterButton>
     </section>
   );
 }
@@ -284,26 +370,30 @@ function Consent({
 }) {
   return (
     <section className="flex flex-1 flex-col justify-center">
-      <h2 className="text-4xl font-black tracking-tight">Before we record</h2>
-      <div className="mt-6 space-y-3 rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+      <Sticker tone="yellow" className="self-start">
+        Before we record
+      </Sticker>
+      <h2 className="bb-headline bb-ink-shadow mt-4 text-6xl sm:text-8xl">Mic Check</h2>
+
+      <Panel tone="paper" className="mt-7 space-y-3 p-6 text-lg font-medium">
         <p>Your microphone audio is used only for this drill, in this browser session.</p>
         <p>Your transcript may be processed to evaluate the answer against the expected behaviors.</p>
         <p>Audio is not retained after the session. Nothing is uploaded to an external service.</p>
         <p>You can decline and exit at any time, and use the typed fallback instead.</p>
-      </div>
+      </Panel>
 
-      <label className="mt-6 flex cursor-pointer items-center gap-3 text-sm">
-        <Checkbox checked={checked} onCheckedChange={(v) => onChange(v === true)} />
+      <label className="bb-panel-sm mt-6 flex cursor-pointer items-center gap-3 self-start bg-teal-bright px-5 py-4 text-base font-bold text-ink">
+        <Checkbox checked={checked} onCheckedChange={(v) => onChange(v === true)} className="border-ink" />
         <span>I understand and consent to microphone use for this drill.</span>
       </label>
 
-      <div className="mt-8 flex gap-3">
-        <Button size="lg" disabled={!checked} onClick={onGrant} className="h-14 px-8 font-bold">
+      <div className="mt-8 flex flex-wrap gap-4">
+        <PosterButton tone="lime" disabled={!checked} onClick={onGrant}>
           I consent — begin
-        </Button>
-        <Button size="lg" variant="ghost" onClick={onDecline} className="h-14">
+        </PosterButton>
+        <PosterButton tone="cream" onClick={onDecline} className="text-base">
           Decline and exit
-        </Button>
+        </PosterButton>
       </div>
     </section>
   );
@@ -327,79 +417,85 @@ function Drill(props: {
 }) {
   return (
     <section className="flex flex-1 flex-col">
-      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">
-        {props.clarify ? "Clarification" : "Scenario"}
-      </p>
-      <p className="mt-3 text-2xl font-bold leading-snug sm:text-3xl">
-        {props.clarify ? CLARIFICATION_QUESTION : SCENARIO_TEXT}
-      </p>
+      <Sticker tone={props.clarify ? "yellow" : "pink"} className="self-start">
+        {props.clarify ? "One more thing" : "The scenario"}
+      </Sticker>
 
-      <button
-        onClick={props.onReplay}
-        className="mt-4 inline-flex w-fit items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <Volume2 className="h-4 w-4" /> {props.speaking ? "Speaking…" : "Play again"}
-      </button>
+      <Panel tone="paper" className="mt-4 p-6">
+        <p className="font-display text-2xl uppercase leading-[1.05] sm:text-4xl">
+          {props.clarify ? CLARIFICATION_QUESTION : SCENARIO_TEXT}
+        </p>
+        <button
+          onClick={props.onReplay}
+          className="bb-panel-sm mt-5 inline-flex items-center gap-2 bg-teal-bright px-4 py-2 text-sm font-bold uppercase tracking-widest"
+        >
+          <Volume2 className="h-4 w-4" /> {props.speaking ? "Speaking…" : "Play again"}
+        </button>
+      </Panel>
 
-      <div className="mt-8 rounded-2xl border border-border bg-card p-6">
-        <div className="flex items-center gap-4">
-          <Button
-            size="lg"
-            variant={props.listening ? "destructive" : "default"}
-            onClick={props.onToggleMic}
-            className="h-14 px-6 font-bold"
-          >
-            {props.listening ? <Square className="mr-2 h-4 w-4" /> : <Mic className="mr-2 h-4 w-4" />}
-            {props.listening ? "Stop" : "Answer by voice"}
-          </Button>
-          <WaveMark active={props.listening} />
-          <span className="text-sm text-muted-foreground">
+      <Sticker tone="lime" className="mt-7 self-start">
+        Your turn
+      </Sticker>
+
+      <Panel tone="deep" className="mt-4 p-6">
+        <div className="flex flex-wrap items-center gap-5">
+          <PosterButton tone={props.listening ? "pink" : "lime"} onClick={props.onToggleMic} className="text-lg">
+            <span className="inline-flex items-center gap-2">
+              {props.listening ? <Square className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+              {props.listening ? "Stop" : "Answer by voice"}
+            </span>
+          </PosterButton>
+          <Equalizer active={props.listening} big />
+          <span className="font-display text-lg uppercase tracking-wide">
             {props.listening ? "Listening…" : props.speechSupported ? "Microphone ready" : "Speech not supported"}
           </span>
         </div>
 
-        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Live transcript</p>
-        <p className="mt-2 min-h-14 text-lg">
-          {props.transcript || <span className="text-muted-foreground">Nothing captured yet.</span>}
+        <p className="mt-6 text-xs font-bold uppercase tracking-[0.22em] text-paper/80">Live transcript</p>
+        <p className="mt-2 min-h-14 text-xl font-medium">
+          {props.transcript || <span className="text-paper/60">Nothing captured yet.</span>}
         </p>
-        {props.micError && <p className="mt-2 text-sm text-destructive">{props.micError}</p>}
-      </div>
+        {props.micError && (
+          <p className="bb-panel-sm mt-3 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">
+            {props.micError}
+          </p>
+        )}
+      </Panel>
 
       <div className="mt-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-warning">Demo fallback — typed answer</p>
+        <Sticker tone="yellow">Demo fallback — typed answer</Sticker>
         <Textarea
           value={props.typed}
           onChange={(e) => props.onTyped(e.target.value)}
           placeholder="Type the answer here if the microphone isn't available."
-          className="mt-2 min-h-24 text-base"
+          className="bb-panel-sm mt-3 min-h-24 bg-paper text-base font-medium text-ink placeholder:text-ink/50"
         />
       </div>
 
       {props.demoMode && (
-        <div className="mt-4 rounded-xl border border-dashed border-border p-4">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Demo answers</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            <Button variant="secondary" size="sm" onClick={() => props.onDemoFill(DEMO_ANSWERS.bad)}>
+        <Panel tone="paper" className="mt-5 p-4">
+          <p className="text-xs font-bold uppercase tracking-widest">Demo answers</p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            <PosterButton tone="pink" className="px-4 py-2 text-sm" onClick={() => props.onDemoFill(DEMO_ANSWERS.bad)}>
               Bad answer
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => props.onDemoFill(DEMO_ANSWERS.vague)}>
+            </PosterButton>
+            <PosterButton
+              tone="yellow"
+              className="px-4 py-2 text-sm"
+              onClick={() => props.onDemoFill(DEMO_ANSWERS.vague)}
+            >
               Vague answer
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => props.onDemoFill(DEMO_ANSWERS.good)}>
+            </PosterButton>
+            <PosterButton tone="lime" className="px-4 py-2 text-sm" onClick={() => props.onDemoFill(DEMO_ANSWERS.good)}>
               Good answer
-            </Button>
+            </PosterButton>
           </div>
-        </div>
+        </Panel>
       )}
 
-      <Button
-        size="lg"
-        disabled={!props.canSubmit}
-        onClick={props.onSubmit}
-        className="mt-8 h-14 self-start px-10 font-bold"
-      >
+      <PosterButton tone="pink" disabled={!props.canSubmit} onClick={props.onSubmit} className="mt-8 self-start">
         Submit answer
-      </Button>
+      </PosterButton>
     </section>
   );
 }
@@ -414,39 +510,43 @@ function ResultScreen({
   onRestart: () => void;
 }) {
   const [openJson, setOpenJson] = useState(false);
+  const [openMetrics, setOpenMetrics] = useState(false);
   const count = result.behaviors_demonstrated.length;
-  const tone =
+  const statusTone =
     result.result === "demonstrated"
-      ? "text-success"
+      ? "bg-accent text-accent-foreground"
       : result.result === "needs_reinforcement"
-        ? "text-warning"
-        : "text-destructive";
+        ? "bg-warning text-warning-foreground"
+        : "bg-primary text-primary-foreground";
 
   return (
     <section className="flex flex-1 flex-col">
-      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-muted-foreground">{result.drill}</p>
-      <h2 className={`mt-3 text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl ${tone}`}>
-        {STATUS_LABEL[result.result]}
-      </h2>
-      <p className="mt-4 text-2xl font-bold">{count} of 3 behaviors demonstrated</p>
+      <Sticker tone="cream" className="self-start">
+        {result.drill}
+      </Sticker>
 
-      <div className="mt-8 space-y-2">
+      <div className={`bb-panel mt-4 px-7 py-8 ${statusTone}`}>
+        <h2 className="bb-headline text-[13vw] leading-[0.85] sm:text-[7rem]">{STATUS_LABEL[result.result]}</h2>
+        <p className="bb-headline mt-4 text-4xl sm:text-6xl">{count} of 3 behaviors demonstrated</p>
+      </div>
+
+      <div className="mt-6 space-y-3">
         {BEHAVIORS.map((b) => {
           const passed = result.behaviors_demonstrated.includes(b.id);
           return (
             <div
               key={b.id}
-              className="flex items-start gap-3 rounded-xl border border-border bg-card px-5 py-4 text-base"
+              className={`bb-panel flex items-center gap-4 px-6 py-5 ${passed ? "bg-accent text-accent-foreground" : "bg-paper text-ink"}`}
             >
               <span
-                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-                  passed ? "bg-success text-success-foreground" : "bg-destructive text-destructive-foreground"
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-[3px] border-ink ${
+                  passed ? "bg-paper" : "bg-primary"
                 }`}
               >
-                {passed ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                {passed ? <Check className="h-6 w-6" strokeWidth={4} /> : <X className="h-6 w-6" strokeWidth={4} />}
               </span>
-              <span>
-                <span className="font-mono text-primary">{b.letter}.</span> {b.label}
+              <span className="font-display text-xl uppercase leading-tight sm:text-2xl">
+                {b.letter}. {b.label}
               </span>
             </div>
           );
@@ -454,55 +554,67 @@ function ResultScreen({
       </div>
 
       {result.most_important_gap && (
-        <div className="mt-6 rounded-2xl border-l-4 border-primary bg-card p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Most important gap</p>
-          <p className="mt-2 text-lg font-semibold">{result.most_important_gap}</p>
-        </div>
+        <Panel tone="pink" className="mt-7 p-6">
+          <Sticker tone="cream">Most important gap</Sticker>
+          <p className="bb-headline mt-3 text-2xl sm:text-4xl">{result.most_important_gap}</p>
+        </Panel>
       )}
 
-      <p className="mt-6 text-base text-muted-foreground">{result.reinforcement_message}</p>
+      <Panel tone="paper" className="mt-5 p-5">
+        <p className="text-lg font-bold">{result.reinforcement_message}</p>
+      </Panel>
 
-      <div className="mt-6 rounded-2xl border border-border bg-card">
-        <button
-          onClick={() => setOpenJson((v) => !v)}
-          className="flex w-full items-center justify-between px-5 py-4 text-sm font-semibold"
-        >
-          Structured Output
-          <ChevronDown className={`h-4 w-4 transition-transform ${openJson ? "rotate-180" : ""}`} />
-        </button>
-        {openJson && (
-          <pre className="overflow-x-auto border-t border-border px-5 py-4 font-mono text-xs text-muted-foreground">
-            {JSON.stringify(result, null, 2)}
-          </pre>
-        )}
-      </div>
-
-      <div className="mt-6 rounded-2xl border border-primary/40 bg-card p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Business impact</p>
-        <p className="mt-2 text-sm">
+      <Panel tone="deep" className="mt-7 p-5">
+        <Sticker tone="cyan">Business impact</Sticker>
+        <p className="mt-3 text-base font-medium">
           Banger Drill gives Business Bangerz something new to sell after delivery: proof that employees can apply
           the message. That creates a premium “verified” tier and a path to recurring reinforcement work.
         </p>
+      </Panel>
+
+      <div className="mt-6 space-y-3">
+        <div className="bb-panel-sm bg-teal-deep">
+          <button
+            onClick={() => setOpenJson((v) => !v)}
+            className="flex w-full items-center justify-between px-5 py-3 text-sm font-bold uppercase tracking-widest"
+          >
+            Structured output
+            <ChevronDown className={`h-4 w-4 transition-transform ${openJson ? "rotate-180" : ""}`} />
+          </button>
+          {openJson && (
+            <pre className="overflow-x-auto border-t-[3px] border-ink px-5 py-4 font-mono text-xs">
+              {JSON.stringify(result, null, 2)}
+            </pre>
+          )}
+        </div>
+
+        <div className="bb-panel-sm bg-teal-deep">
+          <button
+            onClick={() => setOpenMetrics((v) => !v)}
+            className="flex w-full items-center justify-between px-5 py-3 text-sm font-bold uppercase tracking-widest"
+          >
+            Impact metrics — this session
+            <ChevronDown className={`h-4 w-4 transition-transform ${openMetrics ? "rotate-180" : ""}`} />
+          </button>
+          {openMetrics && (
+            <div className="border-t-[3px] border-ink px-5 py-4">
+              <ul className="space-y-1 font-mono text-xs">
+                {events.map((e, i) => (
+                  <li key={i}>
+                    {e.name}
+                    {e.detail ? ` · ${JSON.stringify(e.detail)}` : ""}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-3 font-mono text-xs">Estimated external API cost this session: $0.00</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border border-border p-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          Impact metrics — this session
-        </p>
-        <ul className="mt-3 space-y-1 font-mono text-xs text-muted-foreground">
-          {events.map((e, i) => (
-            <li key={i}>
-              {e.name}
-              {e.detail ? ` · ${JSON.stringify(e.detail)}` : ""}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs text-muted-foreground">Estimated external API cost this session: $0.00</p>
-      </div>
-
-      <Button size="lg" variant="secondary" onClick={onRestart} className="mt-8 h-12 self-start px-8 font-bold">
+      <PosterButton tone="cream" onClick={onRestart} className="mt-8 self-start text-lg">
         Run another drill
-      </Button>
+      </PosterButton>
     </section>
   );
 }
