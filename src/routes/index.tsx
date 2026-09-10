@@ -307,7 +307,13 @@ function BangerDrill() {
         {step === "landing" && <Landing onStart={startDrill} />}
 
         {step === "consent" && (
-          <Consent checked={consent} onChange={setConsent} onGrant={grantConsent} onDecline={restart} />
+          <Consent
+            checked={consent}
+            onChange={setConsent}
+            onGrant={grantConsent}
+            onTypedOnly={continueTypedOnly}
+            onDecline={restart}
+          />
         )}
 
         {step === "drill" && (
@@ -319,6 +325,7 @@ function BangerDrill() {
             typed={typed}
             micError={micError}
             speechSupported={speechSupported}
+            voiceMode={voiceMode}
             demoMode={demoMode}
             onReplay={() => say(clarify ? CLARIFICATION_QUESTION : SCENARIO_TEXT)}
             onToggleMic={toggleMic}
