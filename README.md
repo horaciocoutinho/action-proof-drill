@@ -137,8 +137,10 @@ today reads one.
 ## 6. The primary path
 
 1. Landing screen → **Start Drill** (`session_started`).
-2. Consent screen → explicit checkbox → **I consent — begin** (`consent_granted`). Consent can be withdrawn during the
-   drill via **Withdraw consent & exit** (`consent_withdrawn`), which stops audio and clears session state.
+2. Consent screen → either **I consent — use voice** after checking the microphone consent box (`consent_granted`), or
+   **Continue without microphone** for a typed-only session (`typed_mode_selected`). Voice sessions can be ended with
+   **Withdraw consent & exit** (`consent_withdrawn`); typed-only sessions use **Exit drill**. Either stops audio and
+   clears session state.
 3. Agent speaks the scenario aloud.
 4. User answers by microphone, live transcript appears (or uses the typed demo fallback) → **Submit answer**
    (`response_captured`).
