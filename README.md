@@ -17,15 +17,20 @@ One fictional training case only: **Responsible AI & Customer Data**.
 - **Friction addressed: F5 — no proof of impact after delivery.**
 - **Business outcome: REVENUE.**
 
-Business Bangerz already delivers the message. Banger Drill adds a post-delivery behavioral validation layer that
-shows whether the message translated into correct action — not just whether people liked or remembered the song.
-That supports a premium "verified" tier and recurring reinforcement work.
+Business Bangerz already delivers the message. Banger Drill adds one specific post-delivery proof-of-impact slice we
+chose for F5: **scenario-based evidence that an employee can apply the message to a realistic decision.** We make no
+claims about what any existing Business Bangerz product does or does not measure, and we do not assert that this idea
+is new to the team — this is simply the slice we built.
+
+Commercially, evidence of application is what makes a premium "verified" tier and recurring reinforcement work
+sellable after delivery.
 
 ## 3. What actually works
 
 Functional:
 
-- Spoken scenario via the browser Web Speech Synthesis API (MR-1, OR-2).
+- Spoken scenario via the browser Web Speech Synthesis API (MR-1, OR-2). This plays on the typed-fallback path too,
+  so audio is always part of the workflow even when speech recognition is unavailable.
 - Voice answer capture with a live transcript via the browser Web Speech Recognition API (MR-2, OR-1).
 - Typed answer fallback, clearly labeled "Demo fallback" in the UI (MR-2).
 - Deterministic behavioral evaluator returning structured JSON (MR-3).
@@ -41,9 +46,15 @@ Fallback / stubbed / honest limitations (MR-6):
   `src/lib/evaluator.ts` behind `evaluateBehavioralResponse()` so an LLM evaluator can replace it later.
 - Speech recognition is browser-dependent. Chrome and Edge work; Firefox generally does not. The typed fallback exists
   precisely for that case and for noisy live-demo rooms.
-- No audio file is recorded, stored, or transmitted. Only the in-browser transcript is used, and it disappears when
-  the page is reloaded.
-- Measurement events are in-memory for the session only. There is no analytics backend.
+- **Voice privacy, stated precisely:** this prototype does not save an audio recording. If you use voice input, your
+  browser's speech-recognition service may process the audio according to that browser's own behavior — Chrome, for
+  example, may use a remote recognition service. We do not claim recognition is offline. The transcript is used only
+  for this drill session and is cleared when the session ends.
+- Measurement events and the proof-of-impact payload are in-memory for the session only. There is no analytics
+  backend and nothing is persisted.
+- Consent can be withdrawn mid-drill ("Withdraw consent & exit"): audio stops, session drill state is cleared, a
+  `consent_withdrawn` event is logged, and the app returns to the landing screen.
+- No revenue, attach-rate, or dollar figures are shown anywhere. We do not have that data.
 - There is exactly one drill, hard-coded. There is no authoring UI.
 
 ## 4. How it works
@@ -65,9 +76,47 @@ Structured output shape:
   "behaviors_missed": ["do_not_upload_customer_pii", "anonymize_sensitive_information"],
   "clarification_asked": false,
   "most_important_gap": "Customer information must be removed or anonymized before using AI.",
-  "reinforcement_message": "Remove customer-identifiable information before using an approved AI tool."
+  "reinforcement_message": "Remove customer-identifiable information before using an approved AI tool.",
+  "proof_of_impact": {
+    "banger_id": "banger_demo_0001",
+    "drill_id": "responsible_ai_customer_data_v1",
+    "assessment_completed": true,
+    "behaviors_demonstrated_count": 1,
+    "total_behaviors": 3,
+    "result": "high_risk_gap",
+    "clarification_asked": false,
+    "completed_at": "2026-01-01T12:00:00.000Z"
+  }
 }
 ```
+
+`banger_id` is a fictional demo identifier here. In production it would be the existing song/project ID.
+
+### Why the proof-of-impact payload exists
+
+The session events (`session_started`, `consent_granted`, `response_captured`, `clarification_asked`,
+`result_generated`, `behaviors_demonstrated_count`, `drill_completed`, `consent_withdrawn`) are technical instrumentation
+— useful, but they do not by themselves evidence the REVENUE outcome. The compact `proof_of_impact` payload does the
+commercial work: joined to the existing client/project record, it lets Business Bangerz measure completion and
+behavioral application **per Banger**.
+
+A later production integration would additionally associate the Banger Drill / Verified tier with the project or
+order, which is what makes attach rate, repeat purchase, and recurring reinforcement revenue measurable. We are not
+modelling or estimating any of those numbers here.
+
+### Integration path: Next.js + Supabase (documented, not implemented)
+
+Business Bangerz's stated surface is Next.js and Supabase. This prototype is deliberately client-side, and adoption
+would be small:
+
+1. One table, e.g. `banger_drill_results`, holding the payload fields above plus a foreign key to the existing
+   song/project record, with RLS scoped the same way as existing per-client rows.
+2. One server-side insert — a Next.js route handler or server action calling the Supabase server client — invoked once
+   when the drill completes. The client posts the single JSON result; it never talks to the database directly.
+3. Browser voice capture, speech synthesis, and the evaluator can all remain client-side unchanged.
+
+**Not currently implemented.** Estimated prototype-integration effort: **~0.5–1 engineering day after confirming the
+existing schema and RLS model** — an estimate, subject to schema review.
 
 ## 5. Setup
 
@@ -83,13 +132,15 @@ today reads one.
 ## 6. The primary path
 
 1. Landing screen → **Start Drill** (`session_started`).
-2. Consent screen → explicit checkbox → **I consent — begin** (`consent_granted`).
+2. Consent screen → explicit checkbox → **I consent — begin** (`consent_granted`). Consent can be withdrawn during the
+   drill via **Withdraw consent & exit** (`consent_withdrawn`), which stops audio and clears session state.
 3. Agent speaks the scenario aloud.
 4. User answers by microphone, live transcript appears (or uses the typed demo fallback) → **Submit answer**
    (`response_captured`).
 5. If vague, the agent speaks one clarification question and captures a second answer (`clarification_asked`).
 6. Result screen: status, X of 3 behaviors, per-behavior pass/fail, most important gap, reinforcement message,
-   expandable structured JSON, business impact panel, session impact metrics (`result_generated`,
+   the "scenario-based application check" line, expandable structured JSON (including `proof_of_impact`), business
+   impact panel, collapsible session impact metrics (`result_generated`,
    `behaviors_demonstrated_count`, `drill_completed`).
 
 Demo fixtures are available behind the subtle **Demo** toggle in the header:
@@ -103,7 +154,7 @@ Demo fixtures are available behind the subtle **Demo** toggle in the header:
 ## 7. What you did not build, and why
 
 We intentionally did not build multi-company authentication, dashboards, music generation, billing, a full training
-platform, or a generalized drill authoring system, because the challenge rewards one narrow working slice rather than
+platform, a generalized drill authoring system, or any database provisioning, because the challenge rewards one narrow working slice rather than
 a broad, partly-working platform. Everything above is deliberately out of scope for this prototype.
 
 ## 8. AI-use disclosure
