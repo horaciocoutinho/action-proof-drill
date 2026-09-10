@@ -1,6 +1,7 @@
 /**
  * MR-1 / OR-1 / OR-2: browser-native audio in and out.
- * No external API, no key, no cost.
+ * Uses browser-provided speech APIs; no paid API key is configured by this
+ * prototype. Browser speech recognition may use a browser/vendor service.
  */
 
 export function speak(text: string): Promise<void> {
