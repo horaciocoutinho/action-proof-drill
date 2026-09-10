@@ -1,29 +1,120 @@
-# Welcome to your Lovable project
+# Banger Drill
 
-This project was built with [Lovable](https://lovable.dev).
+## 1. What this is
 
-## Build with Lovable
+Banger Drill is a narrow prototype for the **Business Bangerz AI Voice Agent Prototype Challenge**.
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+**Concept name:** Banger Drill — "Prove they know what to do — not just what the song said."
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+A voice agent speaks one workplace scenario aloud, the user answers by voice, and the system evaluates that answer
+against three explicit expected behaviors. If the answer is vague, the agent asks exactly one spoken clarification
+question. The output is a structured Behavioral Result that a downstream process can consume.
 
-## Development
+One fictional training case only: **Responsible AI & Customer Data**.
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## 2. The outcome it targets
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+- **Friction addressed: F5 — no proof of impact after delivery.**
+- **Business outcome: REVENUE.**
+
+Business Bangerz already delivers the message. Banger Drill adds a post-delivery behavioral validation layer that
+shows whether the message translated into correct action — not just whether people liked or remembered the song.
+That supports a premium "verified" tier and recurring reinforcement work.
+
+## 3. What actually works
+
+Functional:
+
+- Spoken scenario via the browser Web Speech Synthesis API (MR-1, OR-2).
+- Voice answer capture with a live transcript via the browser Web Speech Recognition API (MR-2, OR-1).
+- Typed answer fallback, clearly labeled "Demo fallback" in the UI (MR-2).
+- Deterministic behavioral evaluator returning structured JSON (MR-3).
+- One spoken clarification turn when the answer is vague (OR-3).
+- Explicit consent step with retention statement, recorded as a session event (OR-7).
+- Session measurement events shown on the result screen (OR-11).
+- Session cost estimate: $0.00 external API cost in browser/offline mode (OR-10, OR-13).
+- A single runnable path from spoken input to structured output (MR-4).
+
+Fallback / stubbed / honest limitations (MR-6):
+
+- **The evaluator is deterministic rule and phrase matching, not an LLM.** The UI never claims otherwise. It lives in
+  `src/lib/evaluator.ts` behind `evaluateBehavioralResponse()` so an LLM evaluator can replace it later.
+- Speech recognition is browser-dependent. Chrome and Edge work; Firefox generally does not. The typed fallback exists
+  precisely for that case and for noisy live-demo rooms.
+- No audio file is recorded, stored, or transmitted. Only the in-browser transcript is used, and it disappears when
+  the page is reloaded.
+- Measurement events are in-memory for the session only. There is no analytics backend.
+- There is exactly one drill, hard-coded. There is no authoring UI.
+
+## 4. How it works
+
+1. `src/lib/speech.ts` — browser speech synthesis (agent voice) and speech recognition (user voice).
+2. `src/lib/evaluator.ts` — expected behaviors, vagueness detection (`isVagueResponse`), and
+   `evaluateBehavioralResponse()` which returns the `BehavioralResult` JSON.
+3. `src/lib/metrics.ts` — session event tracking.
+4. `src/routes/index.tsx` — the four screens: landing, consent, drill, result.
+
+Structured output shape:
+
+```json
+{
+  "concept": "Banger Drill",
+  "drill": "Responsible AI & Customer Data",
+  "result": "high_risk_gap",
+  "behaviors_demonstrated": ["use_approved_ai_tool"],
+  "behaviors_missed": ["do_not_upload_customer_pii", "anonymize_sensitive_information"],
+  "clarification_asked": false,
+  "most_important_gap": "Customer information must be removed or anonymized before using AI.",
+  "reinforcement_message": "Remove customer-identifiable information before using an approved AI tool."
+}
 ```
 
-## Built with
+## 5. Setup
 
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+```bash
+bun install
+bun run dev
+```
+
+Open the app in Chrome or Edge and allow microphone access. No API keys and no environment variables are required.
+Future API-backed evaluation or transcription would be configured through environment variables (OR-12); nothing
+today reads one.
+
+## 6. The primary path
+
+1. Landing screen → **Start Drill** (`session_started`).
+2. Consent screen → explicit checkbox → **I consent — begin** (`consent_granted`).
+3. Agent speaks the scenario aloud.
+4. User answers by microphone, live transcript appears (or uses the typed demo fallback) → **Submit answer**
+   (`response_captured`).
+5. If vague, the agent speaks one clarification question and captures a second answer (`clarification_asked`).
+6. Result screen: status, X of 3 behaviors, per-behavior pass/fail, most important gap, reinforcement message,
+   expandable structured JSON, business impact panel, session impact metrics (`result_generated`,
+   `behaviors_demonstrated_count`, `drill_completed`).
+
+Demo fixtures are available behind the subtle **Demo** toggle in the header:
+
+| Fixture | Answer | Expected |
+| --- | --- | --- |
+| Bad | "I would upload the document and ask the AI to summarize it, but I wouldn't share the result externally." | HIGH-RISK GAP, 0 of 3 |
+| Vague | "I'd check with someone first." | One spoken clarification question |
+| Good | "I would remove names and email addresses, use only an approved AI tool, and then summarize the anonymized feedback." | DEMONSTRATED, 3 of 3 |
+
+## 7. What you did not build, and why
+
+We intentionally did not build multi-company authentication, dashboards, music generation, billing, a full training
+platform, or a generalized drill authoring system, because the challenge rewards one narrow working slice rather than
+a broad, partly-working platform. Everything above is deliberately out of scope for this prototype.
+
+## 8. AI-use disclosure
+
+This prototype was built with AI coding assistance (Lovable). The scenario, the three expected behaviors, the drill
+content, and the evaluation rules were authored for this submission. The runtime app performs no LLM calls: the
+behavioral evaluation is deterministic code, and the voice in and out is the browser's own Web Speech API.
+
+## 9. Attribution
+
+- Concept and prototype: Banger Drill, built for the Business Bangerz AI Voice Agent Prototype Challenge.
+- Voice input/output: Web Speech API (browser-native).
+- UI stack: TanStack Start, React, Tailwind CSS, shadcn/ui, Lucide icons.
+- The drill scenario and company case are fictional and used for demonstration only.
