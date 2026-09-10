@@ -146,6 +146,7 @@ function BangerDrill() {
 
   const [step, setStep] = useState<Step>("landing");
   const [consent, setConsent] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
 
   const [speaking, setSpeaking] = useState(false);
@@ -176,6 +177,15 @@ function BangerDrill() {
 
   const grantConsent = async () => {
     track("consent_granted", { scope: "microphone_audio_this_session_only", audio_retained: false });
+    setVoiceMode(true);
+    setStep("drill");
+    await say(SCENARIO_TEXT);
+  };
+
+  const continueTypedOnly = async () => {
+    track("typed_mode_selected", { microphone_enabled: false, voice_consent_granted: false });
+    setVoiceMode(false);
+    setConsent(false);
     setStep("drill");
     await say(SCENARIO_TEXT);
   };
@@ -253,7 +263,10 @@ function BangerDrill() {
     setResult(null);
     setMicError(null);
     setConsent(false);
-    track("consent_withdrawn", { audio_stopped: true, session_state_cleared: true });
+    if (voiceMode) {
+      track("consent_withdrawn", { audio_stopped: true, session_state_cleared: true });
+    }
+    setVoiceMode(true);
     setStep("landing");
   };
 
@@ -263,6 +276,7 @@ function BangerDrill() {
     recognizerRef.current = null;
     setStep("landing");
     setConsent(false);
+    setVoiceMode(true);
     setTranscript("");
     setTyped("");
     setFirstAnswer("");
@@ -293,7 +307,13 @@ function BangerDrill() {
         {step === "landing" && <Landing onStart={startDrill} />}
 
         {step === "consent" && (
-          <Consent checked={consent} onChange={setConsent} onGrant={grantConsent} onDecline={restart} />
+          <Consent
+            checked={consent}
+            onChange={setConsent}
+            onGrant={grantConsent}
+            onTypedOnly={continueTypedOnly}
+            onDecline={restart}
+          />
         )}
 
         {step === "drill" && (
@@ -305,6 +325,7 @@ function BangerDrill() {
             typed={typed}
             micError={micError}
             speechSupported={speechSupported}
+            voiceMode={voiceMode}
             demoMode={demoMode}
             onReplay={() => say(clarify ? CLARIFICATION_QUESTION : SCENARIO_TEXT)}
             onToggleMic={toggleMic}
@@ -372,11 +393,13 @@ function Consent({
   checked,
   onChange,
   onGrant,
+  onTypedOnly,
   onDecline,
 }: {
   checked: boolean;
   onChange: (v: boolean) => void;
   onGrant: () => void;
+  onTypedOnly: () => void;
   onDecline: () => void;
 }) {
   return (
@@ -393,7 +416,10 @@ function Consent({
           browser’s own behavior.
         </p>
         <p>Your transcript is used only for this drill session and is cleared when the session ends.</p>
-        <p>You can use the typed demo fallback instead, and you can decline or withdraw consent at any time.</p>
+        <p>
+          Voice is optional. You can take the whole drill with a typed answer, without enabling the microphone, and you
+          can exit or withdraw consent at any time.
+        </p>
       </Panel>
 
       <label className="bb-panel-sm mt-6 flex cursor-pointer items-center gap-3 self-start bg-teal-bright px-5 py-4 text-base font-bold text-ink">
@@ -403,7 +429,10 @@ function Consent({
 
       <div className="mt-8 flex flex-wrap gap-4">
         <PosterButton tone="lime" disabled={!checked} onClick={onGrant}>
-          I consent — begin
+          I consent — use voice
+        </PosterButton>
+        <PosterButton tone="yellow" onClick={onTypedOnly} className="text-base">
+          Continue without microphone
         </PosterButton>
         <PosterButton tone="cream" onClick={onDecline} className="text-base">
           Decline and exit
@@ -421,6 +450,7 @@ function Drill(props: {
   typed: string;
   micError: string | null;
   speechSupported: boolean;
+  voiceMode: boolean;
   demoMode: boolean;
   onReplay: () => void;
   onToggleMic: () => void;
@@ -452,38 +482,50 @@ function Drill(props: {
         Your turn
       </Sticker>
 
-      <Panel tone="deep" className="mt-4 p-6">
-        <div className="flex flex-wrap items-center gap-5">
-          <PosterButton tone={props.listening ? "pink" : "lime"} onClick={props.onToggleMic} className="text-lg">
-            <span className="inline-flex items-center gap-2">
-              {props.listening ? <Square className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-              {props.listening ? "Stop" : "Answer by voice"}
+      {props.voiceMode ? (
+        <Panel tone="deep" className="mt-4 p-6">
+          <div className="flex flex-wrap items-center gap-5">
+            <PosterButton tone={props.listening ? "pink" : "lime"} onClick={props.onToggleMic} className="text-lg">
+              <span className="inline-flex items-center gap-2">
+                {props.listening ? <Square className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                {props.listening ? "Stop" : "Answer by voice"}
+              </span>
+            </PosterButton>
+            <Equalizer active={props.listening} big />
+            <span className="font-display text-lg uppercase tracking-wide">
+              {props.listening ? "Listening…" : props.speechSupported ? "Microphone ready" : "Speech not supported"}
             </span>
-          </PosterButton>
-          <Equalizer active={props.listening} big />
-          <span className="font-display text-lg uppercase tracking-wide">
-            {props.listening ? "Listening…" : props.speechSupported ? "Microphone ready" : "Speech not supported"}
-          </span>
-        </div>
+          </div>
 
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.22em] text-paper/80">Live transcript</p>
-        <p className="mt-2 min-h-14 text-xl font-medium">
-          {props.transcript || <span className="text-paper/60">Nothing captured yet.</span>}
-        </p>
-        {props.micError && (
-          <p className="bb-panel-sm mt-3 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">
-            {props.micError}
+          <p className="mt-6 text-xs font-bold uppercase tracking-[0.22em] text-paper/80">Live transcript</p>
+          <p className="mt-2 min-h-14 text-xl font-medium">
+            {props.transcript || <span className="text-paper/60">Nothing captured yet.</span>}
           </p>
-        )}
-      </Panel>
+          {props.micError && (
+            <p className="bb-panel-sm mt-3 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">
+              {props.micError}
+            </p>
+          )}
+        </Panel>
+      ) : (
+        <Panel tone="deep" className="mt-4 p-5">
+          <span className="font-display text-lg uppercase tracking-wide">Typed mode — microphone not enabled</span>
+        </Panel>
+      )}
 
       <div className="mt-6">
-        <Sticker tone="yellow">Demo fallback — typed answer</Sticker>
+        <Sticker tone={props.voiceMode ? "yellow" : "lime"}>
+          {props.voiceMode ? "Demo fallback — typed answer" : "Your answer"}
+        </Sticker>
         <Textarea
           value={props.typed}
           onChange={(e) => props.onTyped(e.target.value)}
-          placeholder="Type the answer here if the microphone isn't available."
-          className="bb-panel-sm mt-3 min-h-24 bg-paper text-base font-medium text-ink placeholder:text-ink/50"
+          placeholder={
+            props.voiceMode
+              ? "Type the answer here if the microphone isn't available."
+              : "Type what you would do in this situation."
+          }
+          className={`bb-panel-sm mt-3 bg-paper text-base font-medium text-ink placeholder:text-ink/50 ${props.voiceMode ? "min-h-24" : "min-h-36 text-lg"}`}
         />
       </div>
 
@@ -512,11 +554,8 @@ function Drill(props: {
         <PosterButton tone="pink" disabled={!props.canSubmit} onClick={props.onSubmit}>
           Submit answer
         </PosterButton>
-        <button
-          onClick={props.onWithdraw}
-          className="bb-sticker bg-paper text-[11px] text-ink"
-        >
-          Withdraw consent &amp; exit
+        <button onClick={props.onWithdraw} className="bb-sticker bg-paper text-[11px] text-ink">
+          {props.voiceMode ? <>Withdraw consent &amp; exit</> : "Exit drill"}
         </button>
       </div>
     </section>

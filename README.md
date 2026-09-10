@@ -35,7 +35,10 @@ Functional:
 - Typed answer fallback, clearly labeled "Demo fallback" in the UI (MR-2).
 - Deterministic behavioral evaluator returning structured JSON (MR-3).
 - One spoken clarification turn when the answer is vague (OR-3).
-- Explicit consent step with retention statement, recorded as a session event (OR-7).
+- Explicit consent step with retention statement, recorded as a session event (OR-7). Microphone use is opt-in: the
+  consent screen offers "I consent — use voice" (checkbox required) and "Continue without microphone", so the full
+  drill can be taken with a typed answer and no microphone consent. The typed-only choice is logged as
+  `typed_mode_selected`.
 - Session measurement events shown on the result screen (OR-11).
 - Prototype-paid API cost: $0.00; no paid API credentials are configured (OR-10). Browser speech recognition may use
   the browser/vendor service described below.
@@ -54,7 +57,8 @@ Fallback / stubbed / honest limitations (MR-6):
 - Measurement events and the proof-of-impact payload are in-memory for the session only. There is no analytics
   backend and nothing is persisted.
 - Consent can be withdrawn mid-drill ("Withdraw consent & exit"): audio stops, session drill state is cleared, a
-  `consent_withdrawn` event is logged, and the app returns to the landing screen.
+  `consent_withdrawn` event is logged, and the app returns to the landing screen. In typed-only sessions no microphone
+  consent was granted, so the same control is labeled "Exit drill" and no `consent_withdrawn` event is logged.
 - No revenue, attach-rate, or dollar figures are shown anywhere. We do not have that data.
 - There is exactly one drill, hard-coded. There is no authoring UI.
 
@@ -95,8 +99,8 @@ Structured output shape:
 
 ### Why the proof-of-impact payload exists
 
-The session events (`session_started`, `consent_granted`, `response_captured`, `clarification_asked`,
-`result_generated`, `behaviors_demonstrated_count`, `drill_completed`, `consent_withdrawn`) are technical instrumentation
+The session events (`session_started`, `consent_granted`, `typed_mode_selected`, `response_captured`,
+`clarification_asked`, `result_generated`, `behaviors_demonstrated_count`, `drill_completed`, `consent_withdrawn`) are technical instrumentation
 — useful, but they do not by themselves evidence the REVENUE outcome. The compact `proof_of_impact` payload does the
 commercial work: joined to the existing client/project record, it lets Business Bangerz measure completion and
 behavioral application **per Banger**.
@@ -133,8 +137,10 @@ today reads one.
 ## 6. The primary path
 
 1. Landing screen → **Start Drill** (`session_started`).
-2. Consent screen → explicit checkbox → **I consent — begin** (`consent_granted`). Consent can be withdrawn during the
-   drill via **Withdraw consent & exit** (`consent_withdrawn`), which stops audio and clears session state.
+2. Consent screen → either **I consent — use voice** after checking the microphone consent box (`consent_granted`), or
+   **Continue without microphone** for a typed-only session (`typed_mode_selected`). Voice sessions can be ended with
+   **Withdraw consent & exit** (`consent_withdrawn`); typed-only sessions use **Exit drill**. Either stops audio and
+   clears session state.
 3. Agent speaks the scenario aloud.
 4. User answers by microphone, live transcript appears (or uses the typed demo fallback) → **Submit answer**
    (`response_captured`).

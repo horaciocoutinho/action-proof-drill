@@ -8,6 +8,7 @@ export type MetricEventName =
   | "session_started"
   | "consent_granted"
   | "consent_withdrawn"
+  | "typed_mode_selected"
   | "response_captured"
   | "clarification_asked"
   | "result_generated"
