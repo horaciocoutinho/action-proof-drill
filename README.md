@@ -99,8 +99,8 @@ Structured output shape:
 
 ### Why the proof-of-impact payload exists
 
-The session events (`session_started`, `consent_granted`, `response_captured`, `clarification_asked`,
-`result_generated`, `behaviors_demonstrated_count`, `drill_completed`, `consent_withdrawn`) are technical instrumentation
+The session events (`session_started`, `consent_granted`, `typed_mode_selected`, `response_captured`,
+`clarification_asked`, `result_generated`, `behaviors_demonstrated_count`, `drill_completed`, `consent_withdrawn`) are technical instrumentation
 — useful, but they do not by themselves evidence the REVENUE outcome. The compact `proof_of_impact` payload does the
 commercial work: joined to the existing client/project record, it lets Business Bangerz measure completion and
 behavioral application **per Banger**.
