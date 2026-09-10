@@ -346,18 +346,10 @@ function Landing({ onStart }: { onStart: () => void }) {
         <Panel tone="paper" className="p-6">
           <Sticker tone="pink">Fictional drill</Sticker>
           <h2 className="bb-headline mt-3 text-3xl sm:text-4xl">{DRILL_NAME}</h2>
-          <p className="mt-3 text-base font-medium">
-            One spoken scenario. One spoken answer. Up to one clarification question. Then a structured behavioral
-            result checked against three expected behaviors.
+          <p className="mt-4 text-lg font-medium">
+            One realistic workplace scenario. Answer what you would do. Your response is checked after the drill.
           </p>
-          <ul className="mt-4 space-y-2">
-            {BEHAVIORS.map((b) => (
-              <li key={b.id} className="bb-panel-sm flex items-start gap-3 bg-teal-bright px-4 py-3 text-base font-bold">
-                <span className="font-display text-xl leading-none">{b.letter}.</span>
-                <span>{b.label}</span>
-              </li>
-            ))}
-          </ul>
+          <p className="mt-5 font-display text-xl uppercase tracking-[0.18em]">Scenario-based application check</p>
         </Panel>
 
         <Panel tone="pink" className="flex flex-col items-center justify-center gap-6 p-6">
