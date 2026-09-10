@@ -35,7 +35,10 @@ Functional:
 - Typed answer fallback, clearly labeled "Demo fallback" in the UI (MR-2).
 - Deterministic behavioral evaluator returning structured JSON (MR-3).
 - One spoken clarification turn when the answer is vague (OR-3).
-- Explicit consent step with retention statement, recorded as a session event (OR-7).
+- Explicit consent step with retention statement, recorded as a session event (OR-7). Microphone use is opt-in: the
+  consent screen offers "I consent — use voice" (checkbox required) and "Continue without microphone", so the full
+  drill can be taken with a typed answer and no microphone consent. The typed-only choice is logged as
+  `typed_mode_selected`.
 - Session measurement events shown on the result screen (OR-11).
 - Prototype-paid API cost: $0.00; no paid API credentials are configured (OR-10). Browser speech recognition may use
   the browser/vendor service described below.
