@@ -54,6 +54,25 @@ export const BEHAVIORS: Behavior[] = [
   },
 ];
 
+/** Fictional demo identifiers. In production these would come from the existing song/project record. */
+export const DEMO_BANGER_ID = "banger_demo_0001";
+export const DRILL_ID = "responsible_ai_customer_data_v1";
+
+/**
+ * Compact, persistable payload that ties one drill run to one Banger.
+ * Nothing here is invented business data — it is exactly what this session produced.
+ */
+export interface ProofOfImpactPayload {
+  banger_id: string;
+  drill_id: string;
+  assessment_completed: boolean;
+  behaviors_demonstrated_count: number;
+  total_behaviors: number;
+  result: ResultStatus;
+  clarification_asked: boolean;
+  completed_at: string;
+}
+
 export interface BehavioralResult {
   concept: string;
   drill: string;
@@ -63,6 +82,7 @@ export interface BehavioralResult {
   clarification_asked: boolean;
   most_important_gap: string | null;
   reinforcement_message: string;
+  proof_of_impact: ProofOfImpactPayload;
 }
 
 const norm = (s: string) => " " + s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() + " ";
@@ -218,6 +238,16 @@ export function evaluateBehavioralResponse(
     clarification_asked: options.clarificationAsked,
     most_important_gap: gapBehavior ? gapBehavior.gapMessage : null,
     reinforcement_message: reinforcement,
+    proof_of_impact: {
+      banger_id: DEMO_BANGER_ID,
+      drill_id: DRILL_ID,
+      assessment_completed: true,
+      behaviors_demonstrated_count: demonstrated.length,
+      total_behaviors: BEHAVIORS.length,
+      result,
+      clarification_asked: options.clarificationAsked,
+      completed_at: new Date().toISOString(),
+    },
   };
 }
 

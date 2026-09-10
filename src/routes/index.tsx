@@ -239,6 +239,24 @@ function BangerDrill() {
     setStep("result");
   };
 
+  /** OR-7: consent can be withdrawn mid-drill. Stops audio, clears session state, returns to landing. */
+  const withdrawConsent = () => {
+    stopSpeaking();
+    recognizerRef.current?.stop();
+    recognizerRef.current = null;
+    setSpeaking(false);
+    setListening(false);
+    setTranscript("");
+    setTyped("");
+    setFirstAnswer("");
+    setClarify(false);
+    setResult(null);
+    setMicError(null);
+    setConsent(false);
+    track("consent_withdrawn", { audio_stopped: true, session_state_cleared: true });
+    setStep("landing");
+  };
+
   const restart = () => {
     stopSpeaking();
     recognizerRef.current?.stop();
@@ -296,6 +314,7 @@ function BangerDrill() {
               setTyped(t);
             }}
             onSubmit={submitAnswer}
+            onWithdraw={withdrawConsent}
             canSubmit={Boolean(currentAnswer)}
           />
         )}
@@ -303,7 +322,7 @@ function BangerDrill() {
         {step === "result" && result && <ResultScreen result={result} events={events} onRestart={restart} />}
 
         <footer className="mt-auto pt-10 text-sm font-medium text-foreground/80">
-          Offline demo mode · Browser speech only · Session external API cost: $0.00
+          Demo mode · Browser-native speech · No audio recording saved · Session external API cost: $0.00
         </footer>
       </div>
     </main>
@@ -376,10 +395,13 @@ function Consent({
       <h2 className="bb-headline bb-ink-shadow mt-4 text-6xl sm:text-8xl">Mic Check</h2>
 
       <Panel tone="paper" className="mt-7 space-y-3 p-6 text-lg font-medium">
-        <p>Your microphone audio is used only for this drill, in this browser session.</p>
-        <p>Your transcript may be processed to evaluate the answer against the expected behaviors.</p>
-        <p>Audio is not retained after the session. Nothing is uploaded to an external service.</p>
-        <p>You can decline and exit at any time, and use the typed fallback instead.</p>
+        <p>This prototype does not save an audio recording.</p>
+        <p>
+          If you use voice input, your browser’s speech-recognition service may process the audio according to that
+          browser’s own behavior.
+        </p>
+        <p>Your transcript is used only for this drill session and is cleared when the session ends.</p>
+        <p>You can use the typed demo fallback instead, and you can decline or withdraw consent at any time.</p>
       </Panel>
 
       <label className="bb-panel-sm mt-6 flex cursor-pointer items-center gap-3 self-start bg-teal-bright px-5 py-4 text-base font-bold text-ink">
@@ -413,6 +435,7 @@ function Drill(props: {
   onTyped: (v: string) => void;
   onDemoFill: (v: string) => void;
   onSubmit: () => void;
+  onWithdraw: () => void;
   canSubmit: boolean;
 }) {
   return (
@@ -493,9 +516,17 @@ function Drill(props: {
         </Panel>
       )}
 
-      <PosterButton tone="pink" disabled={!props.canSubmit} onClick={props.onSubmit} className="mt-8 self-start">
-        Submit answer
-      </PosterButton>
+      <div className="mt-8 flex flex-wrap items-center gap-4">
+        <PosterButton tone="pink" disabled={!props.canSubmit} onClick={props.onSubmit}>
+          Submit answer
+        </PosterButton>
+        <button
+          onClick={props.onWithdraw}
+          className="bb-sticker bg-paper text-[11px] text-ink"
+        >
+          Withdraw consent &amp; exit
+        </button>
+      </div>
     </section>
   );
 }
@@ -528,6 +559,9 @@ function ResultScreen({
       <div className={`bb-panel mt-4 px-7 py-8 ${statusTone}`}>
         <h2 className="bb-headline text-[13vw] leading-[0.85] sm:text-[7rem]">{STATUS_LABEL[result.result]}</h2>
         <p className="bb-headline mt-4 text-4xl sm:text-6xl">{count} of 3 behaviors demonstrated</p>
+        <p className="mt-3 font-display text-lg uppercase tracking-[0.18em] sm:text-2xl">
+          Scenario-based application check
+        </p>
       </div>
 
       <div className="mt-6 space-y-3">
@@ -606,7 +640,15 @@ function ResultScreen({
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 font-mono text-xs">Estimated external API cost this session: $0.00</p>
+              <p className="mt-4 text-xs font-bold uppercase tracking-widest">Proof-of-impact payload</p>
+              <pre className="mt-2 overflow-x-auto font-mono text-xs">
+                {JSON.stringify(result.proof_of_impact, null, 2)}
+              </pre>
+              <p className="mt-3 font-mono text-xs">
+                Persistable per Banger once integrated with the existing project record. Not persisted in this
+                prototype.
+              </p>
+              <p className="mt-2 font-mono text-xs">Estimated external API cost this session: $0.00</p>
             </div>
           )}
         </div>
