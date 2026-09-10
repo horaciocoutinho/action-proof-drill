@@ -37,7 +37,8 @@ Functional:
 - One spoken clarification turn when the answer is vague (OR-3).
 - Explicit consent step with retention statement, recorded as a session event (OR-7).
 - Session measurement events shown on the result screen (OR-11).
-- Session cost estimate: $0.00 external API cost in browser/offline mode (OR-10, OR-13).
+- Prototype-paid API cost: $0.00; no paid API credentials are configured (OR-10). Browser speech recognition may use
+  the browser/vendor service described below.
 - A single runnable path from spoken input to structured output (MR-4).
 
 Fallback / stubbed / honest limitations (MR-6):

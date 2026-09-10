@@ -4,8 +4,8 @@
  * MR-3: transforms free-text spoken/typed input into a structured,
  * machine-readable artifact.
  *
- * This is a RULE/PHRASE-BASED evaluator, NOT an LLM. It runs fully offline so
- * the demo works with zero external API cost (OR-10 / OR-13). The interface is
+ * This is a RULE/PHRASE-BASED evaluator, NOT an LLM. The evaluator itself runs
+ * locally in the browser with no paid API credentials (OR-10). The interface is
  * intentionally narrow so a future LLM-backed implementation can replace
  * `evaluateBehavioralResponse` without touching the UI.
  */

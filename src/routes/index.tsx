@@ -322,7 +322,7 @@ function BangerDrill() {
         {step === "result" && result && <ResultScreen result={result} events={events} onRestart={restart} />}
 
         <footer className="mt-auto pt-10 text-sm font-medium text-foreground/80">
-          Demo mode · Browser-native speech · No audio recording saved · Session external API cost: $0.00
+          Demo mode · Browser-provided speech · No audio recording saved · Prototype-paid API cost: $0.00
         </footer>
       </div>
     </main>
@@ -648,7 +648,7 @@ function ResultScreen({
                 Persistable per Banger once integrated with the existing project record. Not persisted in this
                 prototype.
               </p>
-              <p className="mt-2 font-mono text-xs">Estimated external API cost this session: $0.00</p>
+              <p className="mt-2 font-mono text-xs">Prototype-paid API cost this session: $0.00 (no paid API credentials configured)</p>
             </div>
           )}
         </div>
