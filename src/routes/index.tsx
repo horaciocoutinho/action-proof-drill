@@ -482,38 +482,50 @@ function Drill(props: {
         Your turn
       </Sticker>
 
-      <Panel tone="deep" className="mt-4 p-6">
-        <div className="flex flex-wrap items-center gap-5">
-          <PosterButton tone={props.listening ? "pink" : "lime"} onClick={props.onToggleMic} className="text-lg">
-            <span className="inline-flex items-center gap-2">
-              {props.listening ? <Square className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
-              {props.listening ? "Stop" : "Answer by voice"}
+      {props.voiceMode ? (
+        <Panel tone="deep" className="mt-4 p-6">
+          <div className="flex flex-wrap items-center gap-5">
+            <PosterButton tone={props.listening ? "pink" : "lime"} onClick={props.onToggleMic} className="text-lg">
+              <span className="inline-flex items-center gap-2">
+                {props.listening ? <Square className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                {props.listening ? "Stop" : "Answer by voice"}
+              </span>
+            </PosterButton>
+            <Equalizer active={props.listening} big />
+            <span className="font-display text-lg uppercase tracking-wide">
+              {props.listening ? "Listening…" : props.speechSupported ? "Microphone ready" : "Speech not supported"}
             </span>
-          </PosterButton>
-          <Equalizer active={props.listening} big />
-          <span className="font-display text-lg uppercase tracking-wide">
-            {props.listening ? "Listening…" : props.speechSupported ? "Microphone ready" : "Speech not supported"}
-          </span>
-        </div>
+          </div>
 
-        <p className="mt-6 text-xs font-bold uppercase tracking-[0.22em] text-paper/80">Live transcript</p>
-        <p className="mt-2 min-h-14 text-xl font-medium">
-          {props.transcript || <span className="text-paper/60">Nothing captured yet.</span>}
-        </p>
-        {props.micError && (
-          <p className="bb-panel-sm mt-3 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">
-            {props.micError}
+          <p className="mt-6 text-xs font-bold uppercase tracking-[0.22em] text-paper/80">Live transcript</p>
+          <p className="mt-2 min-h-14 text-xl font-medium">
+            {props.transcript || <span className="text-paper/60">Nothing captured yet.</span>}
           </p>
-        )}
-      </Panel>
+          {props.micError && (
+            <p className="bb-panel-sm mt-3 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">
+              {props.micError}
+            </p>
+          )}
+        </Panel>
+      ) : (
+        <Panel tone="deep" className="mt-4 p-5">
+          <span className="font-display text-lg uppercase tracking-wide">Typed mode — microphone not enabled</span>
+        </Panel>
+      )}
 
       <div className="mt-6">
-        <Sticker tone="yellow">Demo fallback — typed answer</Sticker>
+        <Sticker tone={props.voiceMode ? "yellow" : "lime"}>
+          {props.voiceMode ? "Demo fallback — typed answer" : "Your answer"}
+        </Sticker>
         <Textarea
           value={props.typed}
           onChange={(e) => props.onTyped(e.target.value)}
-          placeholder="Type the answer here if the microphone isn't available."
-          className="bb-panel-sm mt-3 min-h-24 bg-paper text-base font-medium text-ink placeholder:text-ink/50"
+          placeholder={
+            props.voiceMode
+              ? "Type the answer here if the microphone isn't available."
+              : "Type what you would do in this situation."
+          }
+          className={`bb-panel-sm mt-3 bg-paper text-base font-medium text-ink placeholder:text-ink/50 ${props.voiceMode ? "min-h-24" : "min-h-36 text-lg"}`}
         />
       </div>
 
