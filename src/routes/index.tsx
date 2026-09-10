@@ -416,7 +416,10 @@ function Consent({
           browser’s own behavior.
         </p>
         <p>Your transcript is used only for this drill session and is cleared when the session ends.</p>
-        <p>You can use the typed demo fallback instead, and you can decline or withdraw consent at any time.</p>
+        <p>
+          Voice is optional. You can take the whole drill with a typed answer, without enabling the microphone, and you
+          can exit or withdraw consent at any time.
+        </p>
       </Panel>
 
       <label className="bb-panel-sm mt-6 flex cursor-pointer items-center gap-3 self-start bg-teal-bright px-5 py-4 text-base font-bold text-ink">
@@ -426,7 +429,10 @@ function Consent({
 
       <div className="mt-8 flex flex-wrap gap-4">
         <PosterButton tone="lime" disabled={!checked} onClick={onGrant}>
-          I consent — begin
+          I consent — use voice
+        </PosterButton>
+        <PosterButton tone="yellow" onClick={onTypedOnly} className="text-base">
+          Continue without microphone
         </PosterButton>
         <PosterButton tone="cream" onClick={onDecline} className="text-base">
           Decline and exit
