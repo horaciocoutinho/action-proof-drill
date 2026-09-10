@@ -146,6 +146,7 @@ function BangerDrill() {
 
   const [step, setStep] = useState<Step>("landing");
   const [consent, setConsent] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
 
   const [speaking, setSpeaking] = useState(false);
