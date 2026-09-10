@@ -177,6 +177,15 @@ function BangerDrill() {
 
   const grantConsent = async () => {
     track("consent_granted", { scope: "microphone_audio_this_session_only", audio_retained: false });
+    setVoiceMode(true);
+    setStep("drill");
+    await say(SCENARIO_TEXT);
+  };
+
+  const continueTypedOnly = async () => {
+    track("typed_mode_selected", { microphone_enabled: false, voice_consent_granted: false });
+    setVoiceMode(false);
+    setConsent(false);
     setStep("drill");
     await say(SCENARIO_TEXT);
   };
