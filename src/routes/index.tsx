@@ -450,6 +450,7 @@ function Drill(props: {
   typed: string;
   micError: string | null;
   speechSupported: boolean;
+  voiceMode: boolean;
   demoMode: boolean;
   onReplay: () => void;
   onToggleMic: () => void;
