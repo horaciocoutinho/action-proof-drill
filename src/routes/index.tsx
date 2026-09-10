@@ -263,7 +263,10 @@ function BangerDrill() {
     setResult(null);
     setMicError(null);
     setConsent(false);
-    track("consent_withdrawn", { audio_stopped: true, session_state_cleared: true });
+    if (voiceMode) {
+      track("consent_withdrawn", { audio_stopped: true, session_state_cleared: true });
+    }
+    setVoiceMode(true);
     setStep("landing");
   };
 
@@ -273,6 +276,7 @@ function BangerDrill() {
     recognizerRef.current = null;
     setStep("landing");
     setConsent(false);
+    setVoiceMode(true);
     setTranscript("");
     setTyped("");
     setFirstAnswer("");
